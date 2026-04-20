@@ -1,6 +1,6 @@
 ![alt text](img/2616.6.2235.png)
 
-[📰 𝕏]() | [🔥 **Abridged**]() | [😼 **GitHub**](https://github.com/1iis/26D19-1.foundations) | [📚 **SolveIT**]() | [Ⓜ️ **Markdown**](https://github.com/1iis/26D19-1.foundations/blob/main/article.md) | [🗒️ **Raw**](https://github.com/1iis/26D19-1.foundations/raw/refs/heads/main/article.md) |
+| [📰 𝕏](# "will be known upon publishing the final draft") | [🔥 **Abridged**](https://github.com/1iis/m01/blob/main/abridged.md "WIP") | [😼 **GitHub**](https://github.com/1iis/m01 "1iis/m01 repo with all files") | [📚 **SolveIT**](https://share.solve.it.com/d/ec8018951af13d01bc4dc8b03abb6663) | [Ⓜ️ **Markdown**](https://github.com/1iis/m01/blob/main/article.md "LLM-friendly input") | [🗒️ **Raw**](https://github.com/1iis/m01/raw/refs/heads/main/article.md "best with GET, wget, curl") |
 | --- | --- | --- | --- | --- | --- |
 
 # Dockerizing SGLang + vLLM on local RTX 3090
