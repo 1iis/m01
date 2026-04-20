@@ -3,7 +3,7 @@
 | [📰 𝕏](# "will be known upon publishing the final draft") | [🔥 **Abridged**](https://github.com/1iis/m01/blob/main/abridged.md "WIP") | [😼 **GitHub**](https://github.com/1iis/m01 "1iis/m01 repo with all files") | [📚 **SolveIT**](https://share.solve.it.com/d/ec8018951af13d01bc4dc8b03abb6663) | [Ⓜ️ **Markdown**](https://github.com/1iis/m01/blob/main/article.md "LLM-friendly input") | [🗒️ **Raw**](https://github.com/1iis/m01/raw/refs/heads/main/article.md "best with GET, wget, curl") |
 | --- | --- | --- | --- | --- | --- |
 
-# Dockerizing SGLang + vLLM on local RTX 3090
+# Dockerizing<br> SGLang + vLLM<br> on local RTX 3090
 
 > **Mission 1: Foundations**  
 > *Let's discover the basics of running fast local inference jobs!*
@@ -12,21 +12,33 @@
 
 ## Introduction
 
-We implement a template to deploy two major AI inference engines: [**SGLang**](https://www.sglang.io/) and [**vLLM**](https://vllm.ai/).
+We implement a template to deploy two major AI GPU inference engines: [**SGLang**](https://www.sglang.io/) and [**vLLM**](https://vllm.ai/).
 
-> *They each have unique benefits and features.  
-> I'm far from having an informed opinion, but AFAICT:*
->
-> [![xpost](img/2616.7.1304.png)](https://x.com/1i__is/status/2045325838640456019)
+### Why
+
+They each have unique benefits and features.  
+I'm far from having an informed opinion, but AFAICT:
+
+[![xpost](img/2616.7.1304.png)](https://x.com/1i__is/status/2045325838640456019)
+> *What's certain is they're the fastest, robust, and scale well.*
+
+> [!NOTE]
+> *They're capable of doing CPU offload.  
+> But for that you may prefer a common implementation of `llama.cpp` such as Unsloth Studio or LMStudio.*
+> 
+> *Here, we expect to run everything in-GPU.*
 
 The goal here isn't to do anything special.  
-Just to get our feet wet, run some GPU inference, see the parts and how they may be wired together. Good foundations for our brain and PC going forward!
+Just to get our feet wet, run some GPU inference, see the parts and how they may be wired together.  
+Good foundations for our brain and PC going forward!
 
-Running AI models is a straightforward server-client architecture.  
-For this mission, two files:
+### How
 
-- ⚓ **`docker-compose.yml`** (container serving the LLM)
-- **Python script** (client sending prompts)
+Running AI models is a straightforward server-client architecture (say, 🆎).  
+For this mission, two files are involved in each request:
+
+- 🅰️ Server: ⚓ **`docker-compose.yml`** (container with inference engine)
+- 🅱️ Client: **Python script** (sends prompt and prints response)
 
 The Docker compose stack has two services/profiles: **SGLang** and **vLLM**.
 
@@ -34,22 +46,23 @@ I've included two Python scripts.
 🖼️ **`test_stream.py`**: short test that shows how to add a picture to the input.  
 📗 **`long_ctx.py`**: stress-test for context length (KV cache) that shows how to add an external file (here, a full book in plain text).  
 
----
+### Table of contents
 
-**TABLE OF CONTENTS**
-1. **Host setup** (drivers, Docker)
-2. **Inference engine server** (Docker compose)
-3. **Logs**
-4. **Client** (test prompts with Python scripts)
-5. **Logs, continued**
-6. **Hardware monitoring** (`nvidia-smi`, `btop`)
+|    | Heading | Topics
+|----|----------------|------------------
+| 1. | **Host setup** | NVIDIA drivers<br>Docker install
+| 2. | **Server \| 🅰️** | Configuration: ⚓ `docker-compose.yml`
+| 3. | **Logs** | Observe:<br>server boot<br>readiness
+| 4. | **Client \| 🅱️** | Tests:<br>Bash `curl`<br>🖼️ `test_stream.py`<br>📗 `long_ctx.py`
+| 5. | **Logs, continued** | Observe:<br>HTTP Requests<br>Inference jobs
+| 6. | **Hardware monitoring** | `nvidia-smi`<br>`btop`
 
 ---
 
 ## 1. Host setup
 
-> [!TIP]
-> ⏩ *If you already have the latest NVIDIA drivers and Docker, skip to 2.*
+> [!NOTE] 
+> **Skip** to **2. Server** if you already have the latest versions of **NVIDIA drivers** and **Docker**.
 
 ### NVIDIA drivers
 
@@ -60,7 +73,8 @@ Use your distribution's preferred method to install.
 - On KDE you can open that from **Settings** > **Driver Manager**.
 - On Ubuntu CLI, **`sudo ubuntu-drivers autoinstall`** should work.
 
-> Note: I was on 570 (hadn't upgraded in a while), and 590 failed to install.  
+> [!TIP]
+> I was on 570 (hadn't upgraded in a while), and 590 failed to install.  
 > I solved the issue by going first to 580, then 590 (reboot each time).
 
 ![nvidia-driver](img/2616.6.2204.png)
@@ -81,8 +95,11 @@ nvcc --version
 zsh: command not found: nvcc
 ```
 
-> 💡 ***That's the whole point of using Docker:**  
-We use CUDA from isolated containers, thus letting us play with **any specific CUDA version** ≤ host, which is agnostic to what our containers run. The images we use (SGLang, vLLM) pack everything we need. No need to destroy your native host to accommodate multiple incompatible packages/versions (same idea as venvs; same limitation as with Linux host kernel version in containers).*
+> [!IMPORTANT]
+> **Containers being CUDA-agnostic makes Docker a great fit for our purpose**
+> 
+> We leverage CUDA from the software contained in isolated containers.  
+> This enables us to play with **any specific CUDA version** ≤ host, which is agnostic to what our containers run. The images we use (SGLang, vLLM) pack everything we need. No need to destroy your native host to accommodate multiple incompatible packages/versions (same idea as `venv`s; same limitation as with `linux` kernel host version in containers).
 
 ### Docker
 
@@ -93,30 +110,35 @@ docker --version
 Docker version 29.4.0, build 9d7ad9f
 ```
 
-> ⚠️ Make sure to add your user to the `docker` group to avoid having to `sudo` all the time (must log out or reboot to take effect).
+> [!CAUTION]
+> Make sure to add your user to the `docker` group to avoid having to `sudo` all the time.
+> ```bash
+> sudo usermod -aG docker $USER
+> ```
+> 
+> User must `logout` fully, or `reboot`, or run `newgrp docker` to take effect.  
+> Verify with: `docker run hello-world`
 
 ---
 
-## 2. Inference engine server
+## 2. Server | 🅰️
+
+Our inference engine lives in a Docker container which  
+- Leverages **CUDA** at the low level  
+  (facing the host's metal, GPU)
+- Presents an **OpenAI-compatible HTTP API** endpoint at the high level  
+  (facing the world, users, including our test scripts in **4. Client | 🅱️**)
 
 ### ⚓ `docker-compose.yml`
 
-> *Use as a base template; add more services/profiles for each model.  
+> *Use as a base template; add more services & profiles for each model.  
 > We'll explore how to build upon this base in future articles.*
 
 Our Docker Compose file can run either:
 - **SGLang** (port `8001`), profile `sglang`
 - or **vLLM** (port `8002`), profile `vllm`
 
-The LLM demonstrated here is Qwen3.5-4B (full 16-bit precision), with FP8 KV cache to fit Qwen3.5's full context (262,144 tokens) on a single RTX 3090.
-
-> 🥵 If your GPU has less VRAM, you may reduce context size by half, and choose a [smaller](https://huggingface.co/Qwen/Qwen3.5-2B) [Qwen3.5](https://huggingface.co/collections/Qwen/qwen35) [variant](https://huggingface.co/Qwen/Qwen3.5-0.8B). We'll cover quantizations in later articles.
-> 
-> 👻 You can also rent a cloud 24 GB GPU for a few dozen cents per hour, but you're on your own for the infra setup. Cloud GPU infeerence will be covered in a later article (lots of platforms, lots of recipe variations to cover).
-
 I've mapped most parameters 1:1 between the two engines (same things, same order between `--port` and `--reasoning-parser`) so you can compare their respective names in SGLang and vLLM.
-
-> 👾 *In a future article, we'll discuss these and more command flags, see how we can review startup logs to tighten our configuration, and discover neat features of these engines.*
 
 📄 **`docker-compose.yml`**
 ```yaml
@@ -188,14 +210,47 @@ services:
       - HF_TOKEN=${HF_TOKEN}
 ```
 
-> [!NOTE]
-> 🤗 **[`HF_TOKEN`](https://huggingface.co/settings/tokens)** (optional: remove those two lines in the YAML if you won't have one)
-> 
-> A [Hugging Face](https://huggingface.co/) (HF) Token to [accelerate downloads](https://huggingface.co/docs/huggingface_hub/en/package_reference/environment_variables#hfxethighperformance).  
-> Signup for a free HF account, and proceed to [**create new Access Token**](https://huggingface.co/settings/tokens/new?tokenType=read) (Read).
+The LLM demonstrated here is **Qwen3.5-4B** (full **16-bit** precision, most straightforward to run), with **FP8** KV cache to fit Qwen3.5's full context (`262,144` tokens) on a **single RTX 3090** or any 24 GB-class GPU.
 
-> ![HF_TOKEN creation](img/2616.7.1418.png)
-> > *Choose whichever token name makes sense to you.*
+**About this configuration**
+
+Three things you may want to adjust *now:* `HF_TOKEN` (get one or remove those lines), context size, and model choice.
+
+- 🤗 **[`HF_TOKEN`](https://huggingface.co/settings/tokens)**
+  > Optional: remove those two lines in the YAML if you won't have one.
+  
+  A [Hugging Face](https://huggingface.co/) (HF) Token to [accelerate downloads](https://huggingface.co/docs/huggingface_hub/en/package_reference/environment_variables#hfxethighperformance).  
+Signup for a free HF account, and proceed to [**create new Access Token**](https://huggingface.co/settings/tokens/new?tokenType=read) (Read).
+  
+  ![HF_TOKEN creation](img/2616.7.1418.png)
+  > *Choose whichever token name makes sense to you.*
+
+  Then add it to your environment (where you'll run `docker` commands).
+  ```bash
+  export HF_TOKEN=hf_...   # paste your token.
+  # Consider adding this line to .bashrc for persistence.
+  ```
+  
+  Alternatively, use a `.env` file (same dir as `docker-compose.yml`, or at a path set by `--env-file` therein).
+
+- 🥵 If your GPU lacks VRAM for the above configuration, two quick likely wins.
+  
+  1. You may **reduce context size**, e.g. by half.
+
+     `--context-length 131072`  
+     `--max-model-len 131072`
+  
+  2. You may **choose a [smaller](https://huggingface.co/Qwen/Qwen3.5-2B) [Qwen3.5](https://huggingface.co/collections/Qwen/qwen35) [variant](https://huggingface.co/Qwen/Qwen3.5-0.8B)**.  
+
+     Copy the name of the model (use the button next to its title on the HF card page, or directly from the URL) and replace it in your config (three times, two for vLLM).
+
+     ![HF model name](img/2617.1.2141-notes.png)
+
+- 👻 You may also rent a cloud GPU with ≥24 GB VRAM for a few dozen cents per hour.  
+But then you're on your own for the docker setup.
+
+> [!NOTE]
+> *Quantizations and cloud GPU inference will be covered in a later articles.*
 
 ### Deploy
 
@@ -294,11 +349,14 @@ command: >
     --max-model-len 131072
 ```
 
-> ⏩ *In a hurry? Now that you have this `docker-compose.yml` file ready and the server started, you may skip to **4. Client**. But if things fail, you'll need logs to inspect and debug.*
-
 ---
 
 ## 3. Logs
+
+> [!NOTE]
+> *In a hurry? Now that you have a `docker-compose.yml` file ready and the server started, you may skip to* **4. Client | 🅱️**.  
+> *But if things fail, you'll need logs to inspect and debug.*
+
 These commands let you see the logs from the server in real time. Extremely useful to know what's going on. Immediately after building or starting a container, check its logs with one of these commands.
 ```bash
 # Either by profile
@@ -310,7 +368,7 @@ docker compose logs -f qwen35-4b-sglang
 docker compose logs -f qwen35-4b-vllm
 ```
 
-When the server is ready, the logs tell you so.
+When the server is ready, a log entry tells you so.
 
 - In SGLang: **`The server is fired up and ready to roll!`**
   ```
@@ -324,7 +382,7 @@ When the server is ready, the logs tell you so.
   The server is fired up and ready to roll!
   ```
 
-- In vLLM: **`Application startup complete.`**
+- In vLLM: **`INFO:     Application startup complete.`**
   ```INFO 04-18 22:30:24 [api_server.py:594] Starting vLLM server on http://0.0.0.0:8000
   INFO 04-18 22:30:24 [launcher.py:37] Available routes are:
   INFO 04-18 22:30:24 [launcher.py:46] Route: /openapi.json, Methods: HEAD, GET
@@ -361,24 +419,25 @@ When the server is ready, the logs tell you so.
 
 You will then see logs printed upon inference requests (see **5. Logs, continued**).
 
-> [!TIP]
-You can leave the command running while the container is `down`, it'll reconnect automatically upon next being `build`.
-
 > 🔬 *In a later article about parameters for SGLang and vLLM, we'll study some of the information provided by those logs before the above excerpts. They provide very useful information about memory use, tokens in KV cache (effective context we can use), overhead (Samba, CUDA graphs, etc.), and other details worth knowing about our configuration.*
 
 ---
 
-## 4. Client
+## 4. Client | 🅱️
 
-- Quick `curl` test in Bash
-- Environment variables for the OpenAI Python library
-- Test 1: 🖼️ Text + Vision input → Streaming output
-- Test 2: 📗 Book-long input → Long output
+- Quick `curl` test in **Bash**
+- **Environment variables** for the OpenAI Python library
+- Test 1: 🖼️ **Text + Vision input → Streaming output**
+- Test 2: 📗 **Book-long input → Long output**
 
 ### Bash
 
 The very first test you can run is a basic `curl`.  
 Below is for SGLang, change localhost port to `8002` for vLLM.
+
+> [!IMPORTANT]
+> On a cloud GPU, you'd replace ` http://localhost:8001 ` with your instance public IP and port.
+
 ```bash
 curl http://localhost:8001/v1/chat/completions \
   -H "Content-Type: application/json" \
@@ -393,20 +452,18 @@ curl http://localhost:8001/v1/chat/completions \
 👇 This returns a JSON object (pretty with `jq`), with `"content"` and `"reasoning_content"` fields that you may inspect.
 
 ![json output](img/2616.7.0658-crop-notes.png)
+> *OpenAI chat template, JSON payload.*
 
-> *OpenAI chat template, JSON payload.*  
-> - `"content"` is the regular output you get.  
-> - `"reasoning_content"` is the "Thinking" part you see before the LLM actually replies (collapsed by default on most GUI like Grok). You may see its token count in `"usage": {"reasoning_tokens": 847}` out of a total response of `"completion_tokens": 956` (which means the actual response is ~100 tokens, 8x less than the "reasoning" budget).
-
-> [!IMPORTANT]
-> On a cloud GPU, you'd replace ` http://localhost:8001 ` with your instance public IP and port.  
-> Likewise for `OPENAI_BASE_URL` below.
+- `"content"` is the regular output you get.  
+- `"reasoning_content"` is the "Thinking" part you see before the LLM actually replies (collapsed by default on most GUI like Grok).  
+You may see its token count in `"usage": { …, "reasoning_tokens": 847 }` out of a total response of `"completion_tokens": 956` (which means the actual response is ~100 tokens, 8x less than the "reasoning" budget).
 
 ---
 
 ### Environment variables
 
-For the Python scripts, we use the OpenAI library which automatically sources the following two environment variables. This lets us keep our script generic, no hardcoded port or URL.
+For the Python scripts, we use the OpenAI library which automatically sources the following two environment variables.  
+This lets us keep our script generic, no hardcoded port or URL.
 ```bash
 export OPENAI_API_KEY="EMPTY"
 
@@ -415,7 +472,8 @@ export OPENAI_BASE_URL="http://localhost:8001/v1"  # SGLang
 export OPENAI_BASE_URL="http://localhost:8002/v1"  # vLLM
 ```
 
-These two ports are defined in the above YAML Docker Compose configuration (in **2. Inference engine server**); change them as you wish but match the Docker services.
+These two ports are defined in the above `docker-compose.yml` (see **2. Server | 🅱️**).  
+Change them as you wish, but match the Docker compose `services` `--port` values.
 
 > [!TIP]
 > You may simplify by using the same port for both if you **never** run them **concurrently**.
@@ -424,24 +482,28 @@ These two ports are defined in the above YAML Docker Compose configuration (in *
 
 ### 🖼️ Text + Vision input → Streaming output
 
-Our first Python test script ([`test_stream.py`](https://github.com/1iis/m01/blob/main/test_stream.py)) sends an image and a question, to test multimodal input with vision, and stream output nicely printed in the terminal.
+Our first Python script ([`test_stream.py`](https://github.com/1iis/m01/blob/main/test_stream.py)) sends:
+- an image of a real-world location (pic below)
+- a question in text: *"Where it this?"*
+
+This tests multimodal input with vision, and streaming of outputs nicely printed in the terminal.
 
 ![Comuna 13](img/e42edc33-b686-4cce-991f-50922c1ad41c.jpeg)
 
-> Comuna 13 in Bogotá, Colombia — viewed from the Origen rooftop bar.
+> *Comuna 13 in Bogotá, Colombia — viewed from the Origen rooftop bar.*
 
 Create a Python file if you haven't cloned the repo:
 ```bash
 nano test_stream.py
 ```
 
-Paste the script below into it ( <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>v</kbd>).  
-Then save and exit ( <kbd>Ctrl</kbd> + <kbd>o</kbd> ⇒ <kbd>Enter</kbd> ⇒ <kbd>Ctrl</kbd> + <kbd>x</kbd> ).
+Paste the script below into it, then save, and exit.  
+<kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>v</kbd> ⇒ <kbd>Ctrl</kbd> + <kbd>o</kbd> ⇒ <kbd>Enter</kbd> ⇒ <kbd>Ctrl</kbd> + <kbd>x</kbd>
 
 📄 **`test_stream.py`**
 ```python
 from openai import OpenAI
-# Configured by environment variables
+# Configured by environment variables: OPENAI_API_KEY and OPENAI_BASE_URL
 client = OpenAI()
 
 messages = [
@@ -494,17 +556,16 @@ def stream_and_print(response_stream):
 stream_and_print(stream)
 ```
 
-Run it with:
+Run our Python script. You may need to `alias`/substitute `python` to `python3` on Ubuntu.
 ```bash
-# Ubuntu
-python3 test_stream.py  # or however you named it
+python test_stream.py  # or however you named it
 
-# Most others
-python test_stream.py
+# if Ubuntu complains / fails: alias python to python3
+echo "alias python=python3" >> ~/.bashrc && source ~/.bashrc
 ```
-
 👇
 
+Example output:
 ```markdown
 This is **Bogotá, Colombia** — specifically, the view from a rooftop or elevated location overlooking the city’s dense hillside neighborhoods.
 
@@ -523,13 +584,14 @@ The “Origen” project is located in the **Chapinero Alto** neighborhood, one 
 So, while the exact spot isn’t named in the image, you’re looking at **Bogotá from above**, likely near the Chapinero Alto area where the Origen installation resides.
 
 📍 *Location: Bogotá, Colombia – near Chapinero Alto / Origen Project*
-
+```
+```
 === Metadata ===
 Model: Qwen/Qwen3.5-4B
 Tokens: CompletionUsage(completion_tokens=304, prompt_tokens=2470, total_tokens=2774, completion_tokens_details=None, prompt_tokens_details=None)
 ```
 
-As you can see, the script outputs `usage` metadata from the model.
+As you can see, the script ends with a summary of `usage` metadata from the model.
 
 ---
 
@@ -537,12 +599,14 @@ As you can see, the script outputs `usage` metadata from the model.
 
 This second Python script ([long_ctx.py](https://github.com/1iis/m01/blob/main/long_ctx.py)) sends a massive input (a whole book!) to stress-test context length.
 
-First, let's retrieve some content to send. I use the awesome [Project Gutenberg](https://www.gutenberg.org/), it's a great source for free public domain books in plain text (UTF-8).
+First, let's retrieve some content to send. I use the awesome [Project Gutenberg](https://www.gutenberg.org/). The books are in the [`books/`](https://github.com/1iis/m01/tree/main/books) dir in the repo.
 
 ![Project Gutenberg](img/2616.7.0441.png)
-> 🔗 https://www.gutenberg.org/ebooks/search/?sort_order=downloads
+> 🔗 *https://www.gutenberg.org/ebooks/search/?sort_order=downloads  
+> Great source for free public domain books in plain text (UTF-8).*
 
-Select books whose token count is below your declared context window length in `docker-compose.yml`  
+Select books whose token count is below your declared context window length in `docker-compose.yml`.  
+Unless you've changed them, here are our values, in tokens:  
 `L26` | SGLang: `--context-length 262144`  
 `L57` | vLLM: `--max-model-len 262144`  
 
@@ -555,7 +619,7 @@ For instance,
 > [!TIP]
 > **Manual steps** (if you haven't cloned the repo)
 > 
-> Grab book files in the browser, or in the shell using `wget` or `curl`:
+> Download the book files in the browser, or in the shell using `wget` or `curl`:
 > ```bash
 > wget -O "books/frankenstein.txt" "https://www.gutenberg.org/cache/epub/84/pg84.txt"
 > curl -o "books/dracula.txt" "https://www.gutenberg.org/cache/epub/345/pg345.txt"
@@ -567,6 +631,10 @@ For instance,
 > ```
 > 
 > Paste the script below, then save and exit.
+
+This script:
+- sends the book (you'll choose which as a shell argument upon running it);
+- asks the LLM to write an essay and then a sequel chapter.
 
 📄 **`long_ctx.py`**
 ```python
@@ -636,14 +704,13 @@ def stream_and_print(response_stream):
 stream_and_print(stream)
 ```
 
-Run it, with the text file containing the book as argument.
+Run it, with the text file containing the book as argument. E.g.:
 ```bash
 python long_ctx.py frankenstein.txt
 python long_ctx.py dracula.txt
 ```
 
-This script asks the LLM to write an essay and then a sequel chapter.  
-The LLM takes a few minutes to load the massive input (SGLang has great logs if you want to monitor that, see below **5. Logs, continued**). The output will then be printed (hopefully nicely) in your terminal. Both scripts report a usage summary at the end.
+The LLM takes a few minutes to load the massive input (SGLang has great logs if you want to monitor that, see below **5. Logs, continued**). The output will then be printed (hopefully nicely) in your terminal, concluded by usage `=== Metadata ===`.
 
 > 🛠️ *We'll explore deeper how to make inference clients fit various goals (latency, speed, cost, accuracy, …) in future articles. E.g. common patterns and libraries, chat templates, multimodal I/O, batching, interface with other software, multi-model orchestration, hybrid cloud/on-prem, load balancing, request routing, etc.*
 
@@ -690,10 +757,34 @@ qwen35-4b-sglang  | [2026-04-18 23:02:23] Decode batch, #running-req: 1, #full t
 qwen35-4b-sglang  | [2026-04-18 23:02:24] Decode batch, #running-req: 1, #full token: 95706, full token usage: 0.36, mamba num: 2, mamba usage: 0.03, cuda graph: True, gen throughput (token/s): 54.90, #queue-req: 0
 ```
 
-Inspecting that stuff is useful to get a feel for how different settings and user actions tend to impact the model and inference engine behavior.
+Inspecting that stuff is useful to get a feel for how different settings, client features, and user actions tend to impact the model and inference engine behavior.
 
-> *You can see pretty obviously that more requests makes the GPU yield more tokens overall, even if each concurrent request individually gets slightly less than a single one.
-AFAIK, maximum throughout for the GPU tends to be reached in the 6-12 range. But I have no idea first-hand. I'll be testing this and much more scenarios in the future.*
+---
+
+### Worth checking out
+
+- **HTTP requests**: initiating URL, METHOD, API endpoint requested, response code (same grammar for both engines)  
+  `INFO:     172.18.0.1:45748 - "POST /v1/chat/completions HTTP/1.1" 200 OK`  
+
+- **Engine ops**: lines beginning with  
+  `qwen35-4b-sglang  | [2026-04-20 21:08:24]`  
+  `qwen35-4b-vllm  | (APIServer pid=1) INFO 04-18 22:48:24 [loggers.py:259] Engine 000: `  
+  - tokens/second **in**  
+     SGLang: `input throughput (token/s): 2632.62`  
+     vLLM: `Avg prompt throughput: 247.0 tokens/s`  
+  - tokens/second **out**  
+     SGLang: `gen throughput (token/s): 109.54`  
+     vLLM: `Avg generation throughput: 30.4 tokens/s`  
+
+  - **KV cache usage** (how much of your context is used on the GPU, in tokens)  
+     SGLang: `#full token: 140003, full token usage: 0.71` (%)  
+     vLLM: `GPU KV cache usage: 38.6%`
+
+  - **Cache hits** (how much of your prompt was already in cache)  
+    vLLM: `Prefix cache hit rate: 42.8%, MM cache hit rate: 50.0%`  
+
+You can also see pretty obviously that processing several requests simultaneously (when there are `#running-req: 2`) makes the GPU yield more tokens overall, even if each concurrent request individually gets slightly less than a single one.  
+AFAIK, maximum throughout for the GPU tends to be reached in the 6-12 range. But I have no idea first-hand. I'll be testing this and much more scenarios in the future.
 
 ---
 
@@ -714,12 +805,11 @@ Prefill batch, #new-seq: 1, #new-token: 973, #cached-token: 94208, ...
 
 ## 6. Hardware monitoring
 
-There's a lot to say here. You can use Prometheus, etc. We'll just see the basics: NVIDIA tools and the `top` family of Bash utilities.
+There's a lot to say here. You can use Prometheus, etc. We'll just see the basics: NVIDIA tools and a Bash utility.
 
-### NVIDIA tools
+### `nvidia-smi`
 
-The first thing is to watch `nvidia-smi` or `btop` to monitor your GPU/VRAM usage, power draw, temperature.
-
+The first thing is to watch `nvidia-smi` to monitor your GPU temperature, power draw, and VRAM usage.
 ```bash
 nvidia-smi -l 1   # Refresh every 1 second
 ```
@@ -728,35 +818,11 @@ nvidia-smi -l 1   # Refresh every 1 second
 > ` Process ` ` Type ` `G`*: Graphics;* ` Type ` `C`*: CUDA.*  
 > *This GPU currently drives my display.* 😅 *Notice how* `Xorg` *+ friends eat up nearly 6 GiB. This is why you want a dedicated GPU for AI if you can help it. I'm sourcing a 3060 as we speak to solve this problem on my rig.*
 
-If temperature is above 65-ish (GPU wil throttle), check and enforce fan speed in the **Nvidia X Server Settings** app (should come with drivers).
-1. Check the box **Enable GPU Fan Settings** (if unavailable: search "nvidia coolbits" for your Xorg/Wayland config)
-2. Set desired % value
-3. Click **Apply** button
-
-![Nvidia X Server Settings](img/2616.7.1519.png)
-
-> [!TIP]
-> ⚡ You may want to soft-limit power to a more reasonable value than your card's default, as this generally has negligible performance impact but makes it run cooler and lowers your electricity bill. We'll discuss this in a dedicated article about hardware.
-> 
-> Right now, you can check **`Current Power Limit`** with:
-> ```bash
->  nvidia-smi -q -d POWER
-> ```
-> ![NVSMI LOG POWER](img/2616.7.1528.png)
-> 
-> If you want to try a different Power Limit, you can do 
-> ```bash
-> sudo nvidia-smi -pm 1
-> sudo nvidia-smi -pl 300 # value in Watts
-> ```
-> 
-> It won't survive reboot though, unless you make it a `systemd` `service`, or DE script.
-
 ---
 
-### btop
+### `btop`
 
-Finally, **`btop`** is a favorite of mine for quick system monitoring.
+A favorite of mine for quick system monitoring.
 ```bash
 sudo apt install btop
 btop
@@ -774,6 +840,57 @@ Press <kbd>Esc</kbd> for **Options**.
 ![btop settings](img/2616.6.2228.png)
 
 > *btop Settings > Shown boxes: "gpu0" added after "cpu"*
+
+---
+
+### Managing temperature
+
+If temperature is above 65-ish (GPU wil throttle), you have two major levers to tweak:
+1. Increase **fan speed**: noisy, but efficient.
+2. Decrease **power draw**: recommended anyway, as most GPU are calibrated to top benchmarks, not to run within physically optimal specs.
+
+> ℹ️ **Note**  
+> OEMs (ASUS, MSI, Gigabyte etc.) will gladly make a GPU eat 25% more power to eek a tiny few more fps in games, because it's not their bill to pay and the silicon *can* take it. Whether you *should* is another question entirely.
+
+#### Fan speed
+
+Check and enforce fan speed in the **Nvidia X Server Settings** app (should come with drivers).
+
+1. Check the box **Enable GPU Fan Settings** (if unavailable: search "nvidia coolbits" for your Xorg/Wayland config)
+2. Set desired % value
+3. Click **Apply** button
+
+![Nvidia X Server Settings](img/2617.2.0003-notes.png)
+> Try to keep temperate well below 80°C for best performance. Modern GPUs will automatically throttle, including VRAM speed, if they're too hot (so you can't break them by running too hard, but you can certainly kill your performance, in games as in AI.)
+
+#### Power Draw
+
+⚡ You may want to soft-limit power to a more reasonable value than your card's default, as this generally has negligible performance impact but makes it run cooler and lowers your electricity bill. We'll discuss this in a dedicated article about hardware.
+
+Right now, you can check **`Current Power Limit`** with:
+```bash
+ nvidia-smi -q -d POWER
+```
+
+![NVSMI LOG POWER](img/2617.2.0026.png)
+> *Add* `-l 2` *to monitor Instantaneous Power Draw while running inference.*
+
+If you want to try a different setting, you can issue a new **Requested Power Limit**.
+```bash
+sudo nvidia-smi -pm 1
+sudo nvidia-smi -pl 300  # value in Watts
+nvidia-smi -q -d POWER   # check effects
+```
+
+This should now read as your **Current Power Limit**.  
+It won't survive reboot though, unless you make it a `systemd` `service`, or DE script.
+
+> [!CAUTION]
+> **NEVER** mess with power settings beyond the **Min/Max Power Limit** range.
+> 
+> Here, I'm allegedly safe between 100 W and 450 W… But the fact is running too close to the sun is how people and PCIe cards get burned (there is more than the GPU, other components may break under stress).
+>
+> For our purposes, about ¼ to ⅓ **below** the **Default Power Limit** (420 W on this EVGA 3090) is usually where we want to live, for most GPUs. In my case, running at 300 W instead yields -10°C, 30% cheaper bill, and about the same performance. Even 275 W could be enough (must test more).
 
 ---
 
