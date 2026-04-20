@@ -25,16 +25,14 @@ Just to get our feet wet, run some GPU inference, see the parts and how they may
 Running AI models is a straightforward server-client architecture.  
 For this mission, two files:
 
-- 📥 **`docker-compose.yml`** (container serving the LLM)
-- 📤 **Python script** (client sending prompts)
+- ⚓ **`docker-compose.yml`** (container serving the LLM)
+- **Python script** (client sending prompts)
 
-The Docker compose stack has two services/profiles:  
-🧡 **SGLang**  
-🩵 **vLLM**  
+The Docker compose stack has two services/profiles: **SGLang** and **vLLM**.
 
 I've included two Python scripts.  
-🅰️ **`test_stream.py`**: short test that shows how to add a picture to the input.  
-🅱️ **`long_ctx.py`**: stress-test for context length (KV cache) that shows how to add an external file (here, a full book in plain text).  
+🖼️ **`test_stream.py`**: short test that shows how to add a picture to the input.  
+📗 **`long_ctx.py`**: stress-test for context length (KV cache) that shows how to add an external file (here, a full book in plain text).  
 
 ---
 
