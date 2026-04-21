@@ -1,8 +1,6 @@
 # Books
 
-> Public Domain, full text in plain UTF-8.
-
-Sourced from [Project Gutenberg](https://www.gutenberg.org/).
+> Public Domain, full text in plain UTF-8. Sourced from [Project Gutenberg](https://www.gutenberg.org/).
 
 | Title | Chars | Words | Tokens<br>(Qwen3)
 | --- | --- | --- | ---
