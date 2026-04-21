@@ -6,7 +6,7 @@
 > *Let's discover the basics of running fast local inference jobs!*
 
 [😼 **GitHub `1iis/m01`**](https://github.com/1iis/m01 "1iis/m01 repo with all files") repository
-| Full version | [📰 𝕏](# "X.com Article link") | [📚 **SolveIT**](https://share.solve.it.com/d/ec8018951af13d01bc4dc8b03abb6663) | [Ⓜ️ **Markdown**](https://github.com/1iis/m01/blob/main/article.md "LLM-friendly input") | [🗒️ **Raw**](https://github.com/1iis/m01/raw/refs/heads/main/article.md "best with GET, wget, curl") |
+| Full version | [📰 𝕏](https://x.com/1i__is/status/2045790740584735038 "X.com Article link") | [📚 **SolveIT**](https://share.solve.it.com/d/ec8018951af13d01bc4dc8b03abb6663) | [Ⓜ️ **Markdown**](https://github.com/1iis/m01/blob/main/article.md "LLM-friendly input") | [🗒️ **Raw**](https://github.com/1iis/m01/raw/refs/heads/main/article.md "best with GET, wget, curl") |
 | --- | --- | --- | --- | --- |
 | **Abridged** | [📰 **𝕏**](https://x.com/1i__is/status/2046429247644791168 "X.com Abridged version") | [📚 **SolveIT**](https://share.solve.it.com/d/ab643991b1d68a22268ceeee6f4aa7d5) | [Ⓜ️ **Markdown**](https://github.com/1iis/m01/blob/main/abridged.md "LLM-friendly input") | [🗒️ **Raw**](https://github.com/1iis/m01/raw/refs/heads/main/abridged.md "best with GET, wget, curl")
 
