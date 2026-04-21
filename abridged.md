@@ -153,7 +153,7 @@ services:
 
 The LLM demonstrated here is **Qwen3.5-4B** (full **16-bit** precision, most straightforward to run), with **FP8** KV cache to fit Qwen3.5's full context (`262,144` tokens) on a **single RTX 3090** or any 24 GB-class GPU.
 
-**About this configuration**
+### About this configuration
 
 Three things you may want to adjust *now:* `HF_TOKEN` (get one or remove those lines), context size, and model choice.
 
@@ -171,7 +171,7 @@ Signup for a free HF account, and proceed to [**create new Access Token**](https
   
   Alternatively, use a `.env` file (same dir as `docker-compose.yml`, or at a path set by `--env-file` therein).
 
-- 🥵 If your GPU lacks VRAM for the above configuration, two quick likely wins.
+- 🥵 If your GPU lacks VRAM for the above configuration, two low-hanging fruits.
   
   1. You may **reduce context size**, e.g. by half.  
      `--context-length 131072`  
@@ -179,22 +179,6 @@ Signup for a free HF account, and proceed to [**create new Access Token**](https
   
   2. You may **choose a [smaller](https://huggingface.co/Qwen/Qwen3.5-2B) [Qwen3.5](https://huggingface.co/collections/Qwen/qwen35) [variant](https://huggingface.co/Qwen/Qwen3.5-0.8B)**.  
      Copy the name of the maker/model (e.g. `Qwen/Qwen3.5-0.8B`) and replace it in your config (three times, two for vLLM).
-
-  E.g.:
-  ```yaml
-  # SGLang service
-  command: >
-    sglang serve
-      --model-path Qwen/Qwen3.5-0.8B
-      ...
-      --context-length 131072
-  
-  # vLLM service
-  command: >
-    Qwen/Qwen3.5-0.8B
-      ...
-      --max-model-len 131072
-  ```
 
 - 👻 You may also rent a cloud GPU with ≥24 GB VRAM, but then you're on your own for the docker setup.
 
@@ -525,33 +509,16 @@ qwen35-4b-vllm  | (APIServer pid=1) INFO 04-18 22:48:24 [loggers.py:259] Engine 
 qwen35-4b-vllm  | (APIServer pid=1) INFO 04-18 22:48:34 [loggers.py:259] Engine 000: Avg prompt throughput: 0.0 tokens/s, Avg generation throughput: 0.0 tokens/s, Running: 0 reqs, Waiting: 0 reqs, GPU KV cache usage: 0.0%, Prefix cache hit rate: 0.0%, MM cache hit rate: 0.0%
 qwen35-4b-vllm  | (APIServer pid=1) INFO:     172.18.0.1:40806 - "POST /v1/chat/completions HTTP/1.1" 200 OK
 qwen35-4b-vllm  | (APIServer pid=1) INFO 04-18 22:50:24 [loggers.py:259] Engine 000: Avg prompt throughput: 35.8 tokens/s, Avg generation throughput: 29.8 tokens/s, Running: 0 reqs, Waiting: 0 reqs, GPU KV cache usage: 0.0%, Prefix cache hit rate: 42.8%, MM cache hit rate: 50.0%
-qwen35-4b-vllm  | (APIServer pid=1) INFO 04-18 22:50:34 [loggers.py:259] Engine 000: Avg prompt throughput: 0.0 tokens/s, Avg generation throughput: 0.0 tokens/s, Running: 0 reqs, Waiting: 0 reqs, GPU KV cache usage: 0.0%, Prefix cache hit rate: 42.8%, MM cache hit rate: 50.0%
 ```
 
 SGLang is a bit more verbose. Here we finish loading a whole book (~100k tokens, 36% of our context), then start generating the output, then simultaneously send a second request (a short one, our first `test_stream.py`) which then outputs at the same time (you can see `gen throughput (token/s)` jump above 100).
 
 ```
-qwen35-4b-sglang  | [2026-04-18 23:02:13] Prefill batch, #new-seq: 1, #new-token: 2048, #cached-token: 0, full token usage: 0.34, mamba usage: 0.03, #running-req: 0, #queue-req: 0, cuda graph: False, input throughput (token/s): 2643.06
-qwen35-4b-sglang  | [2026-04-18 23:02:13] Prefill batch, #new-seq: 1, #new-token: 2048, #cached-token: 0, full token usage: 0.35, mamba usage: 0.03, #running-req: 0, #queue-req: 0, cuda graph: False, input throughput (token/s): 2632.62
 qwen35-4b-sglang  | [2026-04-18 23:02:14] Prefill batch, #new-seq: 1, #new-token: 2048, #cached-token: 0, full token usage: 0.36, mamba usage: 0.03, #running-req: 0, #queue-req: 0, cuda graph: False, input throughput (token/s): 2589.96
 qwen35-4b-sglang  | [2026-04-18 23:02:15] Prefill batch, #new-seq: 1, #new-token: 973, #cached-token: 0, full token usage: 0.36, mamba usage: 0.03, #running-req: 0, #queue-req: 0, cuda graph: False, input throughput (token/s): 4467.39
 qwen35-4b-sglang  | [2026-04-18 23:02:15] INFO:     172.18.0.1:45748 - "POST /v1/chat/completions HTTP/1.1" 200 OK
 qwen35-4b-sglang  | [2026-04-18 23:02:15] Decode batch, #running-req: 1, #full token: 95186, full token usage: 0.36, mamba num: 2, mamba usage: 0.03, cuda graph: True, gen throughput (token/s): 0.14, #queue-req: 0
 qwen35-4b-sglang  | [2026-04-18 23:02:15] Decode batch, #running-req: 1, #full token: 95226, full token usage: 0.36, mamba num: 2, mamba usage: 0.03, cuda graph: True, gen throughput (token/s): 55.54, #queue-req: 0
-qwen35-4b-sglang  | [2026-04-18 23:02:16] Decode batch, #running-req: 1, #full token: 95266, full token usage: 0.36, mamba num: 2, mamba usage: 0.03, cuda graph: True, gen throughput (token/s): 55.74, #queue-req: 0
-qwen35-4b-sglang  | [2026-04-18 23:02:17] Decode batch, #running-req: 1, #full token: 95306, full token usage: 0.36, mamba num: 2, mamba usage: 0.03, cuda graph: True, gen throughput (token/s): 55.49, #queue-req: 0
-qwen35-4b-sglang  | [2026-04-18 23:02:18] Decode batch, #running-req: 1, #full token: 95346, full token usage: 0.36, mamba num: 2, mamba usage: 0.03, cuda graph: True, gen throughput (token/s): 55.57, #queue-req: 0
-qwen35-4b-sglang  | [2026-04-18 23:02:18] Prefill batch, #new-seq: 1, #new-token: 421, #cached-token: 2048, full token usage: 0.37, mamba usage: 0.05, #running-req: 1, #queue-req: 0, cuda graph: False, input throughput (token/s): 267.67
-qwen35-4b-sglang  | [2026-04-18 23:02:18] INFO:     172.18.0.1:43478 - "POST /v1/chat/completions HTTP/1.1" 200 OK
-qwen35-4b-sglang  | [2026-04-18 23:02:18] Decode batch, #running-req: 2, #full token: 97857, full token usage: 0.37, mamba num: 4, mamba usage: 0.05, cuda graph: True, gen throughput (token/s): 59.36, #queue-req: 0
-qwen35-4b-sglang  | [2026-04-18 23:02:19] Decode batch, #running-req: 2, #full token: 97937, full token usage: 0.37, mamba num: 4, mamba usage: 0.05, cuda graph: True, gen throughput (token/s): 109.06, #queue-req: 0
-qwen35-4b-sglang  | [2026-04-18 23:02:20] Decode batch, #running-req: 2, #full token: 98017, full token usage: 0.37, mamba num: 4, mamba usage: 0.05, cuda graph: True, gen throughput (token/s): 108.89, #queue-req: 0
-qwen35-4b-sglang  | [2026-04-18 23:02:20] Decode batch, #running-req: 2, #full token: 98097, full token usage: 0.37, mamba num: 4, mamba usage: 0.05, cuda graph: True, gen throughput (token/s): 109.43, #queue-req: 0
-qwen35-4b-sglang  | [2026-04-18 23:02:21] Decode batch, #running-req: 2, #full token: 98177, full token usage: 0.37, mamba num: 4, mamba usage: 0.05, cuda graph: True, gen throughput (token/s): 109.54, #queue-req: 0
-qwen35-4b-sglang  | [2026-04-18 23:02:22] Decode batch, #running-req: 2, #full token: 98257, full token usage: 0.37, mamba num: 4, mamba usage: 0.05, cuda graph: True, gen throughput (token/s): 108.73, #queue-req: 0
-qwen35-4b-sglang  | [2026-04-18 23:02:23] Decode batch, #running-req: 1, #full token: 95626, full token usage: 0.36, mamba num: 2, mamba usage: 0.03, cuda graph: True, gen throughput (token/s): 88.26, #queue-req: 0
-qwen35-4b-sglang  | [2026-04-18 23:02:23] Decode batch, #running-req: 1, #full token: 95666, full token usage: 0.36, mamba num: 2, mamba usage: 0.03, cuda graph: True, gen throughput (token/s): 52.35, #queue-req: 0
-qwen35-4b-sglang  | [2026-04-18 23:02:24] Decode batch, #running-req: 1, #full token: 95706, full token usage: 0.36, mamba num: 2, mamba usage: 0.03, cuda graph: True, gen throughput (token/s): 54.90, #queue-req: 0
 ```
 
 Inspecting that stuff is useful to get a feel for how different settings, client features, and user actions tend to impact the model and inference engine behavior.
@@ -640,7 +607,7 @@ Press <kbd>Esc</kbd> for **Options**.
 
 If temperature is above 65-ish (GPU wil throttle), you have two major levers to tweak:
 1. Increase **fan speed**: noisy, but efficient.
-2. Decrease **power draw**: recommended anyway, as most GPU are calibrated to top benchmarks, not to run within physically optimal specs.
+2. Decrease **power draw**: recommended anyway.
 
 #### Fan speed
 
@@ -655,7 +622,7 @@ Check and enforce fan speed in the **Nvidia X Server Settings** app (should come
 
 #### Power Draw
 
-⚡ You may want to soft-limit power to a more reasonable value than your card's default, as this generally has negligible performance impact but makes it run cooler and lowers your electricity bill. We'll discuss this in a dedicated article about hardware.
+⚡ You may want to soft-limit power to a more reasonable value than your card's default, as this generally has negligible performance impact but makes it run cooler and lowers your electricity bill.
 
 Right now, you can check **`Current Power Limit`** with:
 ```bash
@@ -678,8 +645,6 @@ It won't survive reboot though, unless you make it a `systemd` `service`, or DE 
 > [!CAUTION]
 > **NEVER** mess with power settings beyond the **Min/Max Power Limit** range.
 > 
-> Here, I'm allegedly safe between 100 W and 450 W…
->
 > For our purposes, about ¼ to ⅓ **below** the **Default Power Limit** (420 W on this EVGA 3090) is usually where we want to live, for most GPUs. In my case, running at 300 W instead yields -10°C, 30% cheaper bill, and about the same performance.
 
 ---

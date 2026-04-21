@@ -212,7 +212,7 @@ services:
 
 The LLM demonstrated here is **Qwen3.5-4B** (full **16-bit** precision, most straightforward to run), with **FP8** KV cache to fit Qwen3.5's full context (`262,144` tokens) on a **single RTX 3090** or any 24 GB-class GPU.
 
-**About this configuration**
+### About this configuration
 
 Three things you may want to adjust *now:* `HF_TOKEN` (get one or remove those lines), context size, and model choice.
 
@@ -233,7 +233,7 @@ Signup for a free HF account, and proceed to [**create new Access Token**](https
   
   Alternatively, use a `.env` file (same dir as `docker-compose.yml`, or at a path set by `--env-file` therein).
 
-- 🥵 If your GPU lacks VRAM for the above configuration, two quick likely wins.
+- 🥵 If your GPU lacks VRAM for the above configuration, two low-hanging fruits.
   
   1. You may **reduce context size**, e.g. by half.
 
