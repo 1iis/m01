@@ -246,6 +246,23 @@ Signup for a free HF account, and proceed to [**create new Access Token**](https
 
      ![HF model name](img/2617.1.2141-notes.png)
 
+  For instance, a much leaner config:
+  ```python
+  %%yaml
+  # SGLang service
+  command: >
+    sglang serve
+      --model-path Qwen/Qwen3.5-0.8B
+      ...
+      --context-length 131072
+  
+  # vLLM service
+  command: >
+    Qwen/Qwen3.5-0.8B
+      ...
+      --max-model-len 131072
+  ```
+
 - 👻 You may also rent a cloud GPU with ≥24 GB VRAM for a few dozen cents per hour.  
 But then you're on your own for the docker setup.
 
@@ -776,7 +793,7 @@ AFAIK, maximum throughout for the GPU tends to be reached in the 6-12 range. But
 
 ### Re-run the scripts
 
-Both, and multiple instances, simultaneously! Check that everything works fine, and that cache works: generation starts instantly when you re-send the book prompt over and over again!
+Both, and multiple requests, simultaneously! Check that everything works fine, and that cache works: generation starts instantly when you re-send the book prompt over and over again!
 
 Look/`grep` for "`cache`":
 

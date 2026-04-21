@@ -188,19 +188,12 @@ Signup for a free HF account, and proceed to [**create new Access Token**](https
 
 Clone the **repo `1iis/m01`** (Mission 1) with all files.
 
-Pick one:
 ```bash
-git clone https://github.com/1iis/m01.git   # HTTPS
-git clone git@github.com:1iis/m01.git       # SSH
-gh repo clone 1iis/m01                      # GitHub CLI tool
-```
-
-Make it your current working dir.
-```bash
+git clone https://github.com/1iis/m01.git
 cd m01
 ```
 
-Consider doing `git init` now. Versioning is very useful to debug/restore configurations.
+You may `git init` for convenience.
 
 #### Build the containers
 
@@ -220,7 +213,7 @@ docker compose down    # kill the container entirely
 Change the value of the environment variable `COMPOSE_PROFILES` to select the other engine.
 
 > [!IMPORTANT]
-Make sure you always ` down` the one running before switching profile to build `up` the other one.  
+Make sure you always ` down ` the one running before switching profile to build `up` the other one.  
 Otherwise, the GPU may get OOM (Out Of Memory) and the build will silently fail.
 
 ---
@@ -230,7 +223,7 @@ Otherwise, the GPU may get OOM (Out Of Memory) and the build will silently fail.
 > [!NOTE]
 > *You may skip to* **4. Client | 🅱️** *now that you have a `docker-compose.yml` file ready and the server started.*
 
-These commands let you see the logs from the server in real time. Extremely useful to know what's going on. Immediately after building or starting a container, check its logs with one of these commands.
+Check server logs.
 ```bash
 # Either by profile
 docker compose --profile sglang logs -f
@@ -260,15 +253,9 @@ When the server is ready, a log entry tells you so.
 
 ## 4. Client | 🅱️
 
-- Quick `curl` test in **Bash**
-- **Environment variables** for the OpenAI Python library
-- Test 1: 🖼️ **Text + Vision input → Streaming output**
-- Test 2: 📗 **Book-long input → Long output**
-
 ### Bash
 
-The very first test you can run is a basic `curl`.  
-Below is for SGLang, change localhost port to `8002` for vLLM.
+Run a basic `curl`. Change localhost port to `8002` for vLLM.
 
 ```bash
 curl http://localhost:8001/v1/chat/completions \
@@ -304,7 +291,7 @@ export OPENAI_BASE_URL="http://localhost:8002/v1"  # vLLM
 
 ### 🖼️ Text + Vision input → Streaming output
 
-Our first Python script ([`test_stream.py`](https://github.com/1iis/m01/blob/main/test_stream.py)) sends:
+[`test_stream.py`](https://github.com/1iis/m01/blob/main/test_stream.py) sends:
 - an image of a real-world location (pic below)
 - a question in text: *"Where it this?"*
 
@@ -367,7 +354,7 @@ def stream_and_print(response_stream):
 stream_and_print(stream)
 ```
 
-Run our Python script.
+Run it.
 ```bash
 python test_stream.py
 ```
@@ -403,12 +390,11 @@ Tokens: CompletionUsage(completion_tokens=304, prompt_tokens=2470, total_tokens=
 
 ### 📗 Book-long input → Long output
 
-This second Python script ([`long_ctx.py`](https://github.com/1iis/m01/blob/main/long_ctx.py)) sends a massive input (a whole book!) to stress-test context length.
+[`long_ctx.py`](https://github.com/1iis/m01/blob/main/long_ctx.py) sends a whole book to stress-test context length.
 
 I've used the awesome [Project Gutenberg](https://www.gutenberg.org/) to retrieve plain text (UTF-8) books. They''re in the [`books/`](https://github.com/1iis/m01/tree/main/books) dir in the repo.
 
 Select books whose token count is below your declared context window length in `docker-compose.yml`.  
-
 For instance,
 - [Frankenstein](img/) **~99k** tokens: good for a 131k context;
 - [Dracula](img/) **~216k** tokens: good for a 262k context.
@@ -511,7 +497,7 @@ qwen35-4b-vllm  | (APIServer pid=1) INFO:     172.18.0.1:40806 - "POST /v1/chat/
 qwen35-4b-vllm  | (APIServer pid=1) INFO 04-18 22:50:24 [loggers.py:259] Engine 000: Avg prompt throughput: 35.8 tokens/s, Avg generation throughput: 29.8 tokens/s, Running: 0 reqs, Waiting: 0 reqs, GPU KV cache usage: 0.0%, Prefix cache hit rate: 42.8%, MM cache hit rate: 50.0%
 ```
 
-SGLang is a bit more verbose. Here we finish loading a whole book (~100k tokens, 36% of our context), then start generating the output, then simultaneously send a second request (a short one, our first `test_stream.py`) which then outputs at the same time (you can see `gen throughput (token/s)` jump above 100).
+SGLang is a bit more verbose by default.
 
 ```
 qwen35-4b-sglang  | [2026-04-18 23:02:14] Prefill batch, #new-seq: 1, #new-token: 2048, #cached-token: 0, full token usage: 0.36, mamba usage: 0.03, #running-req: 0, #queue-req: 0, cuda graph: False, input throughput (token/s): 2589.96
@@ -520,8 +506,6 @@ qwen35-4b-sglang  | [2026-04-18 23:02:15] INFO:     172.18.0.1:45748 - "POST /v1
 qwen35-4b-sglang  | [2026-04-18 23:02:15] Decode batch, #running-req: 1, #full token: 95186, full token usage: 0.36, mamba num: 2, mamba usage: 0.03, cuda graph: True, gen throughput (token/s): 0.14, #queue-req: 0
 qwen35-4b-sglang  | [2026-04-18 23:02:15] Decode batch, #running-req: 1, #full token: 95226, full token usage: 0.36, mamba num: 2, mamba usage: 0.03, cuda graph: True, gen throughput (token/s): 55.54, #queue-req: 0
 ```
-
-Inspecting that stuff is useful to get a feel for how different settings, client features, and user actions tend to impact the model and inference engine behavior.
 
 ---
 
@@ -551,7 +535,7 @@ Inspecting that stuff is useful to get a feel for how different settings, client
 
 ### Re-run the scripts
 
-Both, and multiple instances, simultaneously! Check that everything works fine, and that cache works: generation starts instantly when you re-send the book prompt over and over again!
+Both, and multiple requests, simultaneously! Check that everything works fine, and that cache works: generation starts instantly when you re-send the book prompt over and over again!
 
 Look/`grep` for "`cache`":
 
@@ -565,8 +549,6 @@ Prefill batch, #new-seq: 1, #new-token: 973, #cached-token: 94208, ...
 ---
 
 ## 6. Hardware monitoring
-
-There's a lot to say here. You can use Prometheus, etc. We'll just see the basics: NVIDIA tools and a Bash utility.
 
 ### `nvidia-smi`
 
@@ -605,9 +587,7 @@ Press <kbd>Esc</kbd> for **Options**.
 
 ### Managing temperature
 
-If temperature is above 65-ish (GPU wil throttle), you have two major levers to tweak:
-1. Increase **fan speed**: noisy, but efficient.
-2. Decrease **power draw**: recommended anyway.
+If temperature is above 65-ish (GPU wil throttle), you have two major levers to tweak.
 
 #### Fan speed
 
