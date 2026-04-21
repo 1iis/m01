@@ -3,7 +3,7 @@
 [😼 **GitHub**](https://github.com/1iis/m01 "1iis/m01 repo with all files")
 | Full version | [📰 𝕏](# "X.com Article link") | [📚 **SolveIT**](https://share.solve.it.com/d/ec8018951af13d01bc4dc8b03abb6663) | [Ⓜ️ **Markdown**](https://github.com/1iis/m01/blob/main/article.md "LLM-friendly input") | [🗒️ **Raw**](https://github.com/1iis/m01/raw/refs/heads/main/article.md "best with GET, wget, curl") |
 | --- | --- | --- | --- | --- |
-| 🔥**Abridged** | | [📚 **SolveIT**](https://share.solve.it.com/d/ec8018951af13d01bc4dc8b03abb6663) | [Ⓜ️ **Markdown**](https://github.com/1iis/m01/blob/main/abridged.md "LLM-friendly input") | [🗒️ **Raw**](https://github.com/1iis/m01/raw/refs/heads/main/abridged.md "best with GET, wget, curl")
+| 🔥**Abridged** | [📰 **𝕏**](# "X.com Abridged link") | [📚 **SolveIT**](https://share.solve.it.com/d/ec8018951af13d01bc4dc8b03abb6663) | [Ⓜ️ **Markdown**](https://github.com/1iis/m01/blob/main/abridged.md "LLM-friendly input") | [🗒️ **Raw**](https://github.com/1iis/m01/raw/refs/heads/main/abridged.md "best with GET, wget, curl")
 
 # Dockerizing<br> SGLang + vLLM<br> on local RTX 3090<br>[ABRIDGED] 
 
