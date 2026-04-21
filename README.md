@@ -1,8 +1,8 @@
 ![alt text](img/2616.6.2235.png)
 
-| Full version | [📰 𝕏](# "X.com Article link") | [📚 **SolveIT**](https://share.solve.it.com/d/ec8018951af13d01bc4dc8b03abb6663) | [Ⓜ️ **Markdown**](https://github.com/1iis/m01/blob/main/article.md "LLM-friendly input") | [🗒️ **Raw**](https://github.com/1iis/m01/raw/refs/heads/main/article.md "best with GET, wget, curl") |
+| Full version | [📰 𝕏](# "X.com Article link") | [📚 **SolveIT**](https://share.solve.it.com/d/ec8018951af13d01bc4dc8b03abb6663) | [Ⓜ️ **Markdown**](article.md "LLM-friendly input") | [🗒️ **Raw**](https://github.com/1iis/m01/raw/refs/heads/main/article.md "best with GET, wget, curl") |
 | --- | --- | --- | --- | --- |
-| **Abridged** | [📰 **𝕏**](https://x.com/1i__is/status/2046429247644791168 "X.com Abridged version") | [📚 **SolveIT**](https://share.solve.it.com/d/ab643991b1d68a22268ceeee6f4aa7d5) | [Ⓜ️ **Markdown**](https://github.com/1iis/m01/blob/main/abridged.md "LLM-friendly input") | [🗒️ **Raw**](https://github.com/1iis/m01/raw/refs/heads/main/abridged.md "best with GET, wget, curl")
+| **Abridged** | [📰 **𝕏**](https://x.com/1i__is/status/2046429247644791168 "X.com Abridged version") | [📚 **SolveIT**](https://share.solve.it.com/d/ab643991b1d68a22268ceeee6f4aa7d5) | [Ⓜ️ **Markdown**](abridged.md "LLM-friendly input") | [🗒️ **Raw**](https://github.com/1iis/m01/raw/refs/heads/main/abridged.md "best with GET, wget, curl")
 
 # Dockerizing<br> SGLang + vLLM<br> on local RTX 3090
 
@@ -22,7 +22,7 @@ This is a typical server-client architecture:
 - 🅰️ Server: [`docker-compose.yml`](https://github.com/1iis/m01/blob/main/docker-compose.yml) configures containers for SGLang and vLLM to run [Qwen3.5-4B](https://huggingface.co/Qwen/Qwen3.5-4B).
 - 🅱️ Client:  
 [`test_stream.py`](https://github.com/1iis/m01/blob/main/test_stream.py) queries the server with an image and text prompt.  
-[`long_ctx.py`](https://github.com/1iis/m01/blob/main/long_ctx.py) stress-tests context length (KV cache) with one of the full [`books/`](https://github.com/1iis/m01/tree/main/books) from Gutenberg.  
+[`long_ctx.py`](https://github.com/1iis/m01/blob/main/long_ctx.py) stress-tests context length (KV cache) with one of the full [`books`](books) from Gutenberg.  
 
 ## Usage
 
