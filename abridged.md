@@ -43,9 +43,6 @@ Use your distribution's preferred method to install.
 - On KDE you can open that from **Settings** > **Driver Manager**.
 - On Ubuntu CLI, **`sudo ubuntu-drivers autoinstall`** should work.
 
-![nvidia-driver](img/2616.6.2204.png)
-> *NVIDIA driver (open kernel) metapackage from nvidia-driver-590-open (proprietary)*
-
 After reboot, check that it's fine by running `nvidia-smi`.
 ```bash
 nvidia-smi
@@ -292,11 +289,8 @@ export OPENAI_BASE_URL="http://localhost:8002/v1"  # vLLM
 ### 🖼️ Text + Vision input → Streaming output
 
 [`test_stream.py`](https://github.com/1iis/m01/blob/main/test_stream.py) sends:
-- an image of a real-world location (pic below)
+- an image of a real-world location (Comuna 13 in Bogotá, Colombia)
 - a question in text: *"Where it this?"*
-
-![Comuna 13](img/e42edc33-b686-4cce-991f-50922c1ad41c.jpeg)
-> *Comuna 13 in Bogotá, Colombia — viewed from the Origen rooftop bar.*
 
 📄 **`test_stream.py`**
 ```python
@@ -396,8 +390,8 @@ I've used the awesome [Project Gutenberg](https://www.gutenberg.org/) to retriev
 
 Select books whose token count is below your declared context window length in `docker-compose.yml`.  
 For instance,
-- [Frankenstein](img/) **~99k** tokens: good for a 131k context;
-- [Dracula](img/) **~216k** tokens: good for a 262k context.
+- [Frankenstein](books/frankenstein.txt) **~99k** tokens: good for a 131k context;
+- [Dracula](books/dracula.txt) **~216k** tokens: good for a 262k context.
 
 <!-- [[TODO]]: Make a nice table with Qwen3.5 exact token count; refine books in the repo (or make a dedicated repo for that and other samples); calc remaining tokens and % of 262,144 -->
 

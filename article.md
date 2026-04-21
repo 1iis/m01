@@ -614,8 +614,8 @@ Unless you've changed them, here are our values, in tokens:
 `L57` | vLLM: `--max-model-len 262144`  
 
 For instance,
-- [Frankenstein](img/) **~99k** tokens: good for a 131k context;
-- [Dracula](img/) **~216k** tokens: good for a 262k context.
+- [Frankenstein](books/frankenstein.txt) **~99k** tokens: good for a 131k context;
+- [Dracula](books/dracula.txt) **~216k** tokens: good for a 262k context.
 
 <!-- [[TODO]]: Make a nice table with Qwen3.5 exact token count; refine books in the repo (or make a dedicated repo for that and other samples); calc remaining tokens and % of 262,144 -->
 
