@@ -18,6 +18,14 @@ Or just read below if you need no explaining.
 > [!TIP]
 > Use `raw` versions of Markdown to feed LLM/agents (links at the top).
 
+## Feeback & contribution
+
+> Don't hesitate! 👋
+
+- [Create](https://github.com/1iis/m01/issues/new) a new [issue](https://github.com/1iis/m01/issues) (even just to talk)
+- Reply to the [article on X](https://x.com/1i__is/status/2046429247644791168)
+- Feed free to [DM me! `@1i__is`](https://x.com/1i__is)
+
 ---
 
 ## Overview
@@ -103,11 +111,3 @@ python long_ctx.py books/dracula.txt     # pushing context length
 > uv pip install -e .     # uv: same
 > uv pip install openai   # install openai package directly
 > ```
-
-## Feeback & contribution
-
-> Don't hesitate!
-
-- [Create](https://github.com/1iis/m01/issues/new) a new [issue](https://github.com/1iis/m01/issues) (even just to talk)
-- Reply to the [article on X](https://x.com/1i__is/status/2046429247644791168)
-- Feed free to [DM me! `@1i__is`](https://x.com/1i__is)
