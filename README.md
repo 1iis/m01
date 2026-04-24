@@ -58,23 +58,23 @@ Clone this repo.
    python long_ctx.py books/dracula.txt     # pushing context
    ```
 
-   > [!TIP]
-   > If you get this error:
-   > 
-   > ```
-   > Traceback (most recent call last):
-   >   File "/home/kit/data/1/org/1iis/ai/Lab0/art/m01/test_stream.py", line 1, in <module>
-   >     from openai import OpenAI
-   > ModuleNotFoundError: No module named 'openai'
-   > ```
-   > 
-   > Then proceed to install that package.  
-   > Optionally, first make a virtual environment to keep your host clean.
-   > ```bash
-   > python -m venv .venv && source .venv/bin/activate   # venv creation & activation
-   > 
-   > # Pick one:
-   > pip install -e .        # pip: install deps listed in pyproject.toml
-   > uv pip install -e .     # uv: same
-   > uv pip install openai   # install openai package directly
-   > ```
+> [!TIP]
+> If you get this error:
+> 
+> ```
+> Traceback (most recent call last):
+>   File "/home/kit/data/1/org/1iis/ai/Lab0/art/m01/test_stream.py", line 1, in <module>
+>     from openai import OpenAI
+> ModuleNotFoundError: No module named 'openai'
+> ```
+> 
+> Then proceed to install that package.  
+> Optionally, first make a virtual environment to keep your host clean.
+> ```bash
+> python -m venv .venv && source .venv/bin/activate   # venv creation & activation
+> 
+> # Pick one:
+> pip install -e .        # pip: install deps listed in pyproject.toml
+> uv pip install -e .     # uv: same
+> uv pip install openai   # install openai package directly
+> ```
