@@ -71,7 +71,8 @@ Clone this repo.
 > Then proceed to install that package.  
 > Optionally, first make a virtual environment to keep your host clean.
 > ```bash
-> python -m venv .venv && source .venv/bin/activate   # venv creation & activation
+> # venv creation & activation
+> python -m venv .venv && source .venv/bin/activate
 > 
 > # Pick one:
 > pip install -e .        # pip: install deps listed in pyproject.toml
