@@ -23,10 +23,10 @@ Or just read below if you need no explaining.
 ## Overview
 
 This is a typical server-client architecture:
-- 🅰️ Server: [`docker-compose.yml`](docker-compose.yml) configures containers for SGLang and vLLM to run [Qwen3.5-4B](https://huggingface.co/Qwen/Qwen3.5-4B).
+- 🅰️ Server: [**`docker-compose.yml`**](docker-compose.yml) configures containers for SGLang and vLLM to run [Qwen3.5-4B](https://huggingface.co/Qwen/Qwen3.5-4B).
 - 🅱️ Client:  
-[`test_stream.py`](test_stream.py) queries the server with an image and text prompt.  
-[`long_ctx.py`](long_ctx.py) stress-tests context length (KV cache) with one of the full [`books`](books) from Gutenberg.  
+[**`test_stream.py`**](test_stream.py) queries the server with an image and text prompt.  
+[**`long_ctx.py`**](long_ctx.py) stress-tests context length (KV cache) with one of the full [**`books`**](books) from Gutenberg.  
 
 ## Usage
 
