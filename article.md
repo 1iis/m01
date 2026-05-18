@@ -346,8 +346,8 @@ docker compose --profile vllm down
 ```
 
 > [!IMPORTANT]
-Make sure you always ` down` the one running before switching profile to build `up` the other one.  
-Otherwise, the GPU may get OOM (Out Of Memory) and the build will silently fail.
+> Make sure you always ` down` the one running before switching profile to build `up` the other one.  
+> Otherwise, the GPU may get OOM (Out Of Memory) and the build will silently fail.
 
 ### Troubleshooting
 
